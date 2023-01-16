@@ -1,16 +1,8 @@
 [package]
-name = "study"
+name = "ch04_ownership"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-adder = { path = "adder" }
-
-[workspace]
-members = [
-    "adder",
-    "ch02_guessing_game",
-    "ch04_ownership",
-]
