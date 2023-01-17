@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ch02_guessing_game/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ch04_ownership/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ch13_iterators_and_closures/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/adder/target" />
     </content>
