@@ -28,6 +28,10 @@ name = "ch13_iterators_and_closures"
 version = "0.1.0"
 
 [[package]]
+name = "ch15_smart_pointers"
+version = "0.1.0"
+
+[[package]]
 name = "getrandom"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"

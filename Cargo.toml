@@ -14,4 +14,5 @@ members = [
     "ch02_guessing_game",
     "ch04_ownership",
     "ch13_iterators_and_closures",
+    "ch15_smart_pointers",
 ]
