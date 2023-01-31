@@ -110,9 +110,44 @@ fn main_15_3() {
     println!("End of main.");
 }
 
+/********** 15.4 Rc **********/
+enum ListRc {
+    ConsRc(i32, Rc<ListRc>),
+    NilRc,
+}
+
+impl Drop for ListRc {
+    fn drop(&mut self) {
+        println!("Dropping ListRc");
+    }
+}
+
+use ListRc::{ConsRc, NilRc};
+use std::rc::Rc;
+
+fn main_15_4() {
+    let a = Rc::new(ConsRc(5, Rc::new(ConsRc(10, Rc::new(NilRc)))));
+    println!("count after creating a = a:{}", Rc::strong_count(&a));
+    let b = Rc::new(ConsRc(3, Rc::clone(&a)));
+    println!("count after creating b = a:{}, b:{}",
+             Rc::strong_count(&a),
+             Rc::strong_count(&b));
+    {
+        let c = Rc::new(ConsRc(4, Rc::clone(&a)));
+        println!("count after creating c = a:{}, b:{}, c:{}",
+                 Rc::strong_count(&a),
+                 Rc::strong_count(&b),
+                 Rc::strong_count(&c));
+    }
+    println!("count after c goes out of scope = a:{}, b:{}",
+             Rc::strong_count(&a),
+             Rc::strong_count(&b));
+}
+
 /********** Main **********/
 fn main() {
     main_15_1();
     main_15_2();
     main_15_3();
+    main_15_4();
 }
