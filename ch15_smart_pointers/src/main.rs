@@ -126,6 +126,8 @@ use ListRc::{ConsRc, NilRc};
 use std::rc::Rc;
 
 fn main_15_4() {
+    println!("\n********** 15.4 **********");
+
     let a = Rc::new(ConsRc(5, Rc::new(ConsRc(10, Rc::new(NilRc)))));
     println!("count after creating a = a:{}", Rc::strong_count(&a));
     let b = Rc::new(ConsRc(3, Rc::clone(&a)));
@@ -144,10 +146,48 @@ fn main_15_4() {
              Rc::strong_count(&b));
 }
 
+/********** 15.5 RefCell **********/
+#[derive(Debug)]
+enum ListRefCell {
+    ConsRefCell(Rc<RefCell<i32>>, Rc<ListRefCell>),
+    NilRefCell,
+}
+
+use ListRefCell::{ConsRefCell, NilRefCell};
+use std::cell::RefCell;
+
+fn main_15_5() {
+    println!("\n********** 15.5 **********");
+
+    let value = Rc::new(RefCell::new(5));
+
+    let a = Rc::new(ConsRefCell(Rc::clone(&value), Rc::new(NilRefCell)));
+
+    let b = ConsRefCell(Rc::new(RefCell::new(3)), Rc::clone(&a));
+    let c = ConsRefCell(Rc::new(RefCell::new(4)), Rc::clone(&a));
+
+    *value.borrow_mut() += 100;
+    {
+        let mut d = value.borrow_mut();
+        *d += 10;
+    }
+
+    println!("a after = {:?}", a);
+    println!("b after = {:?}", b);
+    println!("c after = {:?}", c);
+}
+
+/********** 15.6 Reference Cycles **********/
+fn main_15_6() {
+    println!("\n********** 15.6 **********");
+}
+
 /********** Main **********/
 fn main() {
     main_15_1();
     main_15_2();
     main_15_3();
     main_15_4();
+    main_15_5();
+    main_15_6();
 }
