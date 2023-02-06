@@ -122,6 +122,17 @@ impl Drop for ListRc {
     }
 }
 
+struct Owner {
+    name: String
+    // ...other fields
+}
+
+struct Gadget {
+    id: i32,
+    owner: Rc<Owner>
+    // ...other fields
+}
+
 use ListRc::{ConsRc, NilRc};
 use std::rc::Rc;
 
@@ -144,6 +155,26 @@ fn main_15_4() {
     println!("count after c goes out of scope = a:{}, b:{}",
              Rc::strong_count(&a),
              Rc::strong_count(&b));
+
+    let gadget_owner : Rc<Owner> = Rc::new(
+        Owner { name: String::from("Gadget Man") }
+    );
+
+    let gadget1 = Gadget { id: 1, owner: gadget_owner.clone() };
+    let gadget2 = Gadget { id: 2, owner: gadget_owner.clone() };
+
+    println!("Gadget {} owned by {}", gadget1.id, gadget1.owner.name);
+    println!("Gadget {} owned by {}", gadget2.id, gadget2.owner.name);
+
+    let owner = &gadget1.owner;
+    println!("owner '{}' borrowed", (*owner).name);
+    println!("owner '{}' borrowed", owner.name);
+    print_owner(&*gadget1.owner);
+    print_owner(&gadget1.owner);
+}
+
+fn print_owner(owner: &Owner) {
+    println!("owner '{}' borrowed", owner.name);
 }
 
 /********** 15.5 RefCell **********/
