@@ -346,6 +346,8 @@ fn main_15_6() {
         );
     }
 
+    leaf.print();
+
     println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
     println!(
         "leaf strong = {}, weak = {}",
