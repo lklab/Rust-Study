@@ -134,7 +134,7 @@ struct Gadget {
 }
 
 use ListRc::{ConsRc, NilRc};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 fn main_15_4() {
     println!("\n********** 15.4 **********");
@@ -209,8 +209,149 @@ fn main_15_5() {
 }
 
 /********** 15.6 Reference Cycles **********/
+use ListCycle::{ConsCycle, NilCycle};
+
+#[derive(Debug)]
+enum ListCycle {
+    ConsCycle(i32, RefCell<Rc<ListCycle>>),
+    NilCycle,
+}
+
+
+impl ListCycle {
+    fn tail(&self) -> Option<&RefCell<Rc<ListCycle>>> {
+        match self {
+            ConsCycle(_, item) => Some(item),
+            NilCycle => None,
+        }
+    }
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+struct Node {
+    value: i32,
+    name: String,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+impl Node {
+    fn print(&self) {
+        let parent = match self.parent.borrow().upgrade() {
+            Some(node) => format!("{}", node.value),
+            None => String::from("none"),
+        };
+
+        let children_vec = &*self.children.borrow();
+
+        let children = if children_vec.len() == 0 {
+            String::from("none")
+        } else {
+            children_vec.iter()
+                .map(|node| format!("{}", node.value))
+                .collect::<Vec<String>>()
+                .join(", ")
+        };
+
+        println!("[{}] value = {}, parent = {}, children = {}",
+             self.name,
+             self.value,
+             parent,
+             children);
+    }
+}
+
 fn main_15_6() {
     println!("\n********** 15.6 **********");
+
+    let a = Rc::new(ConsCycle(5, RefCell::new(Rc::new(NilCycle))));
+
+    println!("a initial rc count = {}", Rc::strong_count(&a));
+    println!("a next item = {:?}", a.tail());
+
+    let b = Rc::new(ConsCycle(10, RefCell::new(Rc::clone(&a))));
+
+    println!("a rc count after b creation = {}", Rc::strong_count(&a));
+    println!("b initial rc count = {}", Rc::strong_count(&b));
+    println!("b next item = {:?}", b.tail());
+
+    if let Some(link) = a.tail() {
+        *link.borrow_mut() = Rc::clone(&b);
+    }
+
+    println!("b rc count after changing a = {}", Rc::strong_count(&b));
+    println!("a rc count after changing a = {}", Rc::strong_count(&a));
+
+    // Uncomment the next line to see that we have a cycle;
+    // it will overflow the stack
+    // println!("a next item = {:?}", a.tail());
+
+    let leaf = Rc::new(Node {
+        value: 3,
+        name: String::from("leaf"),
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });
+
+    leaf.print();
+
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&leaf),
+        Rc::weak_count(&leaf),
+    );
+
+    {
+        let branch = Rc::new(Node {
+            value: 5,
+            name: String::from("branch"),
+            parent: RefCell::new(Weak::new()),
+            children: RefCell::new(vec![Rc::clone(&leaf)]),
+        });
+
+        *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+        leaf.print();
+        branch.print();
+
+        println!(
+            "branch strong = {}, weak = {}",
+            Rc::strong_count(&branch),
+            Rc::weak_count(&branch),
+        );
+
+        println!(
+            "leaf strong = {}, weak = {}",
+            Rc::strong_count(&leaf),
+            Rc::weak_count(&leaf),
+        );
+
+        let leaf2 = Rc::new(Node {
+            value: 7,
+            name: String::from("leaf2"),
+            parent: RefCell::new(Rc::downgrade(&branch)),
+            children: RefCell::new(vec![]),
+        });
+
+        branch.children.borrow_mut().push(Rc::clone(&leaf2));
+
+        leaf2.print();
+        branch.print();
+
+        println!(
+            "branch strong = {}, weak = {}",
+            Rc::strong_count(&branch),
+            Rc::weak_count(&branch),
+        );
+    }
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&leaf),
+        Rc::weak_count(&leaf),
+    );
 }
 
 /********** Main **********/
